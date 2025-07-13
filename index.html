@@ -7,35 +7,27 @@
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-  <!-- TensorFlow & Teachable Machine -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-
   <style>
     body {
-      background: linear-gradient(135deg, #e0f7fa, #ffffff);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     .deteksi-wrapper {
-      background: #ffffff;
+      background: var(--bs-body-bg);
+      color: var(--bs-body-color);
       border-radius: 15px;
       padding: 30px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 500px;
+      transition: all 0.3s;
     }
 
     .preview-box {
-      border: 2px dashed #0d6efd;
+      border: 2px dashed var(--bs-primary);
       border-radius: 10px;
       padding: 10px;
-      background-color: #f0f8ff;
+      background-color: rgba(13, 110, 253, 0.05);
       margin-top: 20px;
     }
 
@@ -52,17 +44,33 @@
       transition: all 0.3s ease;
     }
 
-    .btn-group-custom button {
-      min-width: 150px;
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .info-box {
+      margin-top: 15px;
+      text-align: left;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .info-box.active {
+      display: block;
     }
   </style>
 </head>
-<body>
-  <div class="deteksi-wrapper text-center">
+<body class="bg-light text-dark position-relative">
+  <!-- Tombol Theme Toggle -->
+  <button class="btn btn-sm btn-outline-secondary theme-toggle" onclick="toggleTheme()">🌙 Ganti Tema</button>
+
+  <div class="deteksi-wrapper text-center mx-auto mt-5">
     <h2 class="mb-4 text-primary">🔍 Deteksi Jenis Sampah</h2>
 
     <!-- Tombol Kamera dan Upload -->
-    <div class="d-flex justify-content-center gap-2 flex-wrap mb-3 btn-group-custom">
+    <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
       <button class="btn btn-outline-primary" onclick="initCamera()">📷 Mulai Kamera</button>
       <input class="form-control" type="file" accept="image/*" onchange="predictUpload(event)" />
     </div>
@@ -72,15 +80,27 @@
 
     <!-- Hasil Deteksi -->
     <div id="hasil" class="alert alert-primary mt-3">Jenis Sampah: -</div>
+
+    <!-- Penjelasan Jenis Sampah -->
+    <div id="info-box" class="info-box alert alert-info"></div>
   </div>
 
   <!-- Bootstrap Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 
   <script>
-    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/TUHdE1OST/";
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/dxWFZYVVD/";
     let model, webcam, maxPredictions;
     let loopId = null;
+
+    const infoBox = document.getElementById("info-box");
+    const explanations = {
+      "Organik": "♻️ Sampah organik adalah sampah yang berasal dari bahan hayati seperti sisa makanan, daun, dan kulit buah. Bisa diurai secara alami.",
+      "Anorganik": "🔧 Sampah anorganik adalah sampah dari bahan non-hayati seperti plastik, logam, dan kaca. Sulit terurai secara alami.",
+      "B3": "☠️ Sampah B3 (Bahan Berbahaya dan Beracun) seperti baterai, obat, limbah medis, dan cat. Harus ditangani dengan sangat hati-hati."
+    };
 
     window.addEventListener("DOMContentLoaded", async () => {
       try {
@@ -88,9 +108,9 @@
         const metadataURL = MODEL_URL + "metadata.json";
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
-        console.log("✅ Model berhasil dimuat.");
+        console.log("Model berhasil dimuat.");
       } catch (err) {
-        console.error("❌ Gagal memuat model:", err);
+        console.error("Gagal memuat model:", err);
         alert("Gagal memuat model. Silakan cek koneksi atau URL model.");
       }
     });
@@ -112,6 +132,7 @@
         container.innerHTML = "";
         container.appendChild(webcam.canvas);
         document.getElementById("hasil").innerText = "Jenis Sampah: -";
+        infoBox.classList.remove("active");
       } catch (err) {
         alert("Gagal mengakses kamera: " + err.message);
       }
@@ -160,6 +181,7 @@
       container.innerHTML = "";
       container.appendChild(img);
       document.getElementById("hasil").innerText = "Jenis Sampah: -";
+      infoBox.classList.remove("active");
     }
 
     function showResult(predictions) {
@@ -167,6 +189,38 @@
       const hasil = sorted[0];
       document.getElementById("hasil").innerText =
         "Jenis Sampah: " + hasil.className + " (" + (hasil.probability * 100).toFixed(2) + "%)";
+
+      // Tampilkan info penjelasan
+      const klasifikasi = hasil.className.toLowerCase();
+      if (klasifikasi.includes("organik")) {
+        tampilkanInfo("Organik");
+      } else if (klasifikasi.includes("anorganik")) {
+        tampilkanInfo("Anorganik");
+      } else if (klasifikasi.includes("b3")) {
+        tampilkanInfo("B3");
+      } else {
+        infoBox.classList.remove("active");
+      }
+    }
+
+    function tampilkanInfo(kategori) {
+      infoBox.innerText = explanations[kategori];
+      infoBox.classList.add("active");
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.contains("bg-dark");
+
+      if (isDark) {
+        body.classList.remove("bg-dark", "text-light");
+        body.classList.add("bg-light", "text-dark");
+        document.querySelector(".theme-toggle").innerText = "🌙 Ganti Tema";
+      } else {
+        body.classList.remove("bg-light", "text-dark");
+        body.classList.add("bg-dark", "text-light");
+        document.querySelector(".theme-toggle").innerText = "☀️ Tema Terang";
+      }
     }
   </script>
 </body>
