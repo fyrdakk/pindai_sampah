@@ -14,38 +14,64 @@
 
   <style>
     body {
-      padding-top: 30px;
-      background-color: #f8f9fa;
+      background: linear-gradient(135deg, #e0f7fa, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
+
+    .deteksi-wrapper {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .preview-box {
+      border: 2px dashed #0d6efd;
+      border-radius: 10px;
+      padding: 10px;
+      background-color: #f0f8ff;
+      margin-top: 20px;
+    }
+
     #preview-area video,
     #preview-area canvas,
     #preview-area img {
       width: 100%;
-      max-width: 300px;
       border-radius: 10px;
-      margin-bottom: 15px;
     }
+
     #hasil {
-      font-size: 1.2rem;
-      font-weight: bold;
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-group-custom button {
+      min-width: 150px;
     }
   </style>
 </head>
-<body class="text-center">
-  <div class="container">
-    <h1 class="mb-4">Deteksi Jenis Sampah</h1>
+<body>
+  <div class="deteksi-wrapper text-center">
+    <h2 class="mb-4 text-primary">🔍 Deteksi Jenis Sampah</h2>
 
     <!-- Tombol Kamera dan Upload -->
-    <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
-      <button class="btn btn-primary" onclick="initCamera()">📷 Mulai Kamera</button>
-      <input class="form-control w-auto" type="file" accept="image/*" onchange="predictUpload(event)" />
+    <div class="d-flex justify-content-center gap-2 flex-wrap mb-3 btn-group-custom">
+      <button class="btn btn-outline-primary" onclick="initCamera()">📷 Mulai Kamera</button>
+      <input class="form-control" type="file" accept="image/*" onchange="predictUpload(event)" />
     </div>
 
     <!-- Preview -->
-    <div id="preview-area" class="mx-auto mb-3"></div>
+    <div id="preview-area" class="preview-box"></div>
 
     <!-- Hasil Deteksi -->
-    <div id="hasil" class="alert alert-info w-75 mx-auto">Jenis Sampah: -</div>
+    <div id="hasil" class="alert alert-primary mt-3">Jenis Sampah: -</div>
   </div>
 
   <!-- Bootstrap Bundle -->
@@ -53,11 +79,9 @@
 
   <script>
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/TUHdE1OST/";
-
     let model, webcam, maxPredictions;
-    let loopId = null; // untuk menyimpan loop kamera
+    let loopId = null;
 
-    // Load model saat halaman dibuka
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         const modelURL = MODEL_URL + "model.json";
@@ -71,15 +95,11 @@
       }
     });
 
-    // Inisialisasi Kamera
     async function initCamera() {
       try {
-        if (webcam) {
-          await webcam.stop();
-        }
-
+        if (webcam) await webcam.stop();
         if (loopId) {
-          cancelAnimationFrame(loopId); // hentikan loop sebelumnya
+          cancelAnimationFrame(loopId);
           loopId = null;
         }
 
@@ -91,7 +111,6 @@
         const container = document.getElementById("preview-area");
         container.innerHTML = "";
         container.appendChild(webcam.canvas);
-
         document.getElementById("hasil").innerText = "Jenis Sampah: -";
       } catch (err) {
         alert("Gagal mengakses kamera: " + err.message);
@@ -110,11 +129,9 @@
       showResult(prediction);
     }
 
-    // Upload gambar, kamera dimatikan jika aktif
     async function predictUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       if (!model) {
         alert("Model belum siap. Tunggu sebentar lalu coba lagi.");
         return;
@@ -131,12 +148,10 @@
 
       const container = document.getElementById("preview-area");
 
-      // Stop kamera dan animasi loop jika aktif
       if (webcam) {
         await webcam.stop();
         webcam = null;
       }
-
       if (loopId) {
         cancelAnimationFrame(loopId);
         loopId = null;
@@ -144,7 +159,6 @@
 
       container.innerHTML = "";
       container.appendChild(img);
-
       document.getElementById("hasil").innerText = "Jenis Sampah: -";
     }
 
