@@ -99,7 +99,7 @@
     const explanations = {
       "Organik": "♻️ Sampah organik adalah sampah yang berasal dari bahan hayati seperti sisa makanan, daun, dan kulit buah. Bisa diurai secara alami.",
       "Anorganik": "🔧 Sampah anorganik adalah sampah dari bahan non-hayati seperti plastik, logam, dan kaca. Sulit terurai secara alami.",
-      "B3": "☠️ Sampah B3 (Bahan Berbahaya dan Beracun) seperti baterai, obat, limbah medis, dan cat. Harus ditangani dengan sangat hati-hati."
+      "Bahan Beracun dan Berbahaya (B3)": "☠️ Sampah Bahan Beracun dan Berbahaya (B3) seperti baterai, obat, limbah medis, dan cat. Harus ditangani dengan sangat hati-hati."
     };
 
     window.addEventListener("DOMContentLoaded", async () => {
@@ -195,8 +195,8 @@
         tampilkanInfo("Organik");
       } else if (klasifikasi === "anorganik") {
         tampilkanInfo("Anorganik");
-      } else if (klasifikasi === "B3") {
-        tampilkanInfo("B3");
+      } else if (klasifikasi === "bahan beracun dan berbahaya (b3)") {
+        tampilkanInfo("Bahan Beracun dan Berbahaya (B3)");
       } else {
         infoBox.classList.remove("active");
       }
