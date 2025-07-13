@@ -180,16 +180,17 @@
     function showResult(predictions) {
       const sorted = predictions.sort((a, b) => b.probability - a.probability);
       const hasil = sorted[0];
-
+      const nama = hasil.className;
       document.getElementById("hasil").innerText =
-        "Jenis Sampah: " + hasil.className + " (" + (hasil.probability * 100).toFixed(2) + "%)";
-
-      const klasifikasi = hasil.className.toLowerCase();
-      if (klasifikasi.includes("organik")) {
+        "Jenis Sampah: " + nama + " (" + (hasil.probability * 100).toFixed(2) + "%)";
+    
+      const lower = nama.toLowerCase();
+    
+      if (lower.includes("organik") && !lower.includes("anorganik")) {
         tampilkanInfo("Organik");
-      } else if (klasifikasi.includes("anorganik")) {
+      } else if (lower.includes("anorganik")) {
         tampilkanInfo("Anorganik");
-      } else if (klasifikasi.includes("b3")) {
+      } else if (lower.includes("b3") || lower.includes("beracun")) {
         tampilkanInfo("Bahan Beracun dan Berbahaya (B3)");
       } else {
         infoBox.classList.remove("active");
