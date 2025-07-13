@@ -180,18 +180,25 @@
     function showResult(predictions) {
       const sorted = predictions.sort((a, b) => b.probability - a.probability);
       const hasil = sorted[0];
-      const nama = hasil.className;
+      const nama = hasil.className.trim(); // hilangkan spasi aneh
+      const lower = nama.toLowerCase();
+    
       document.getElementById("hasil").innerText =
         "Jenis Sampah: " + nama + " (" + (hasil.probability * 100).toFixed(2) + "%)";
     
-      const lower = nama.toLowerCase();
+      let kategori = "";
     
-      if (lower.includes("organik") && !lower.includes("anorganik")) {
-        tampilkanInfo("Organik");
-      } else if (lower.includes("anorganik")) {
-        tampilkanInfo("Anorganik");
+      if (lower.includes("anorganik")) {
+        kategori = "Anorganik";
+      } else if (lower.includes("organik")) {
+        kategori = "Organik";
       } else if (lower.includes("b3") || lower.includes("beracun")) {
-        tampilkanInfo("Bahan Beracun dan Berbahaya (B3)");
+        kategori = "Bahan Beracun dan Berbahaya (B3)";
+      }
+    
+      if (kategori && explanations[kategori]) {
+        infoBox.innerText = explanations[kategori];
+        infoBox.classList.add("active");
       } else {
         infoBox.classList.remove("active");
       }
