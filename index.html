@@ -5,20 +5,32 @@
   <title>Deteksi Jenis Sampah</title>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 30px; }
-    video, img { width: 300px; margin: 10px; border-radius: 10px; }
-    #hasil { font-size: 20px; margin-top: 20px; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 30px;
+    }
+    video, canvas, img {
+      width: 300px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+    #hasil {
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h1>Deteksi Jenis Sampah</h1>
-  <button onclick="init()">📷 Mulai Kamera</button>
+  <button onclick="init()">Mulai Kamera</button>
   <input type="file" accept="image/*" onchange="predictUpload(event)">
   <div><video id="webcam" autoplay muted playsinline width="300"></video></div>
   <div id="hasil">Jenis Sampah: -</div>
 
   <script type="text/javascript">
-    //model
+    // Ganti ini dengan link model kamu sendiri dari Teachable Machine
     const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/";
 
     let model, webcam, maxPredictions;
@@ -27,15 +39,21 @@
       const modelURL = URL + "model.json";
       const metadataURL = URL + "metadata.json";
 
-      model = await tmImage.load(modelURL, metadataURL);
-      maxPredictions = model.getTotalClasses();
+      try {
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+        console.log("Model dimuat ✔");
 
-      webcam = new tmImage.Webcam(300, 300, true);
-      await webcam.setup();
-      await webcam.play();
-      window.requestAnimationFrame(loop);
+        webcam = new tmImage.Webcam(300, 300, true);
+        await webcam.setup({ facingMode: "environment" }); // Kamera belakang
+        await webcam.play();
+        window.requestAnimationFrame(loop);
 
-      document.getElementById("webcam").replaceWith(webcam.canvas);
+        document.getElementById("webcam").replaceWith(webcam.canvas);
+      } catch (err) {
+        alert("Gagal memuat model atau kamera: " + err.message);
+        console.error(err);
+      }
     }
 
     async function loop() {
@@ -51,6 +69,8 @@
 
     async function predictUpload(event) {
       const file = event.target.files[0];
+      if (!file) return;
+
       const img = document.createElement("img");
       img.src = URL.createObjectURL(file);
       img.onload = async () => {
@@ -60,9 +80,11 @@
     }
 
     function showResult(predictions) {
+      console.log("Prediksi:", predictions); // Debug
       const sorted = predictions.sort((a, b) => b.probability - a.probability);
-      const hasil = `${sorted[0].className} (${(sorted[0].probability * 100).toFixed(2)}%)`;
-      document.getElementById("hasil").innerText = "Jenis Sampah: " + hasil;
+      const hasil = sorted[0];
+      document.getElementById("hasil").innerText =
+        "Jenis Sampah: " + hasil.className + " (" + (hasil.probability * 100).toFixed(2) + "%)";
     }
   </script>
 </body>
