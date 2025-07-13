@@ -2,45 +2,24 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Deteksi Jenis Sampah</title>
-
-  <!-- TensorFlow & Teachable Machine -->
+  <title>Deteksi Sampah</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-
   <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      margin-top: 30px;
-    }
-    video, canvas, img {
-      width: 300px;
-      margin: 10px;
-      border-radius: 10px;
-    }
-    #hasil {
-      font-size: 20px;
-      font-weight: bold;
-      margin-top: 20px;
-    }
+    body { font-family: Arial; text-align: center; margin-top: 30px; }
+    video, canvas, img { width: 300px; margin: 10px; border-radius: 10px; }
+    #hasil { font-size: 20px; font-weight: bold; margin-top: 20px; }
   </style>
 </head>
 <body>
   <h1>Deteksi Jenis Sampah</h1>
   <button onclick="init()">📷 Mulai Kamera</button>
   <input type="file" accept="image/*" onchange="predictUpload(event)">
-  
-  <!-- Tempat kamera atau canvas webcam -->
-  <div id="cameraContainer"><video id="webcam" autoplay muted playsinline></video></div>
-  
-  <!-- Preview gambar upload -->
-  <div><img id="preview" style="display:none;" /></div>
-  
+  <div><video id="webcam" autoplay muted playsinline width="300"></video></div>
   <div id="hasil">Jenis Sampah: -</div>
 
   <script type="text/javascript">
-    const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/";
+    const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/"; // MODEL SIAP PAKAI
 
     let model, webcam, maxPredictions;
 
@@ -52,12 +31,8 @@
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
-        // Sembunyikan preview upload
-        document.getElementById("preview").style.display = "none";
-
-        // Aktifkan webcam
         webcam = new tmImage.Webcam(300, 300, true);
-        await webcam.setup({ facingMode: "environment" });
+        await webcam.setup({ facingMode: "environment" }); // Pakai kamera belakang kalau ada
         await webcam.play();
         window.requestAnimationFrame(loop);
 
@@ -69,11 +44,9 @@
     }
 
     async function loop() {
-      if (webcam) {
-        webcam.update();
-        await predict();
-        window.requestAnimationFrame(loop);
-      }
+      webcam.update();
+      await predict();
+      window.requestAnimationFrame(loop);
     }
 
     async function predict() {
@@ -84,22 +57,10 @@
     async function predictUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-
-      // Matikan kamera jika aktif
-      if (webcam) {
-        await webcam.stop();
-        webcam = null;
-        document.getElementById("cameraContainer").innerHTML =
-          '<video id="webcam" autoplay muted playsinline></video>';
-      }
-
-      // Tampilkan preview gambar
-      const imgElement = document.getElementById("preview");
-      imgElement.src = URL.createObjectURL(file);
-      imgElement.style.display = "block";
-
-      imgElement.onload = async () => {
-        const prediction = await model.predict(imgElement);
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.onload = async () => {
+        const prediction = await model.predict(img);
         showResult(prediction);
       };
     }
