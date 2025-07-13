@@ -1,25 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Deteksi Sampah</title>
+  <title>Deteksi Jenis Sampah</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 30px; }
-    video, canvas, img { width: 300px; margin: 10px; border-radius: 10px; }
-    #hasil { font-size: 20px; font-weight: bold; margin-top: 20px; }
+    #preview-area video,
+    #preview-area canvas,
+    #preview-area img {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    #hasil {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
   </style>
 </head>
-<body>
-  <h1>Deteksi Jenis Sampah</h1>
-  <button onclick="init()">📷 Mulai Kamera</button>
-  <input type="file" accept="image/*" onchange="predictUpload(event)">
-  <div><video id="webcam" autoplay muted playsinline width="300"></video></div>
-  <div id="hasil">Jenis Sampah: -</div>
+<body class="bg-light text-center py-5">
+
+  <div class="container">
+    <h1 class="mb-4">Deteksi Jenis Sampah</h1>
+
+    <div class="d-flex justify-content-center mb-3 flex-wrap gap-2">
+      <button class="btn btn-primary" onclick="init()">📷 Mulai Kamera</button>
+      <input class="form-control w-auto" type="file" accept="image/*" onchange="predictUpload(event)">
+    </div>
+
+    <div id="preview-area" class="mx-auto mb-3"></div>
+
+    <div id="hasil" class="alert alert-info w-75 mx-auto">Jenis Sampah: -</div>
+  </div>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script type="text/javascript">
-    const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/"; // MODEL SIAP PAKAI
+    const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/";
 
     let model, webcam, maxPredictions;
 
@@ -32,11 +56,13 @@
         maxPredictions = model.getTotalClasses();
 
         webcam = new tmImage.Webcam(300, 300, true);
-        await webcam.setup({ facingMode: "environment" }); // Pakai kamera belakang kalau ada
+        await webcam.setup({ facingMode: "environment" });
         await webcam.play();
         window.requestAnimationFrame(loop);
 
-        document.getElementById("webcam").replaceWith(webcam.canvas);
+        const container = document.getElementById("preview-area");
+        container.innerHTML = "";
+        container.appendChild(webcam.canvas);
       } catch (err) {
         alert("Gagal mengakses kamera: " + err.message);
         console.error("Error kamera atau model:", err);
@@ -57,12 +83,19 @@
     async function predictUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
+
       const img = document.createElement("img");
       img.src = URL.createObjectURL(file);
+      img.classList.add("img-fluid");
+
       img.onload = async () => {
         const prediction = await model.predict(img);
         showResult(prediction);
       };
+
+      const container = document.getElementById("preview-area");
+      container.innerHTML = "";
+      container.appendChild(img);
     }
 
     function showResult(predictions) {
