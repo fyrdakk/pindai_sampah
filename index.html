@@ -2,13 +2,16 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Deteksi Jenis Sampah</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Deteksi Jenis Sampah</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MQFJ4hUjwrMoZzJ5LmVv5ZV8rPl3nRzpe9V78/5Uhw9K/qMJjTk/s1bQ4dMJqBkI" crossorigin="anonymous">
+
+  <!-- TensorFlow dan Teachable Machine -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+
   <style>
+    body { font-family: Arial, sans-serif; padding-top: 30px; }
     #preview-area video,
     #preview-area canvas,
     #preview-area img {
@@ -17,14 +20,13 @@
       border-radius: 10px;
       margin-bottom: 15px;
     }
-
     #hasil {
       font-size: 1.2rem;
       font-weight: bold;
     }
   </style>
 </head>
-<body class="bg-light text-center py-5">
+<body class="bg-light text-center">
 
   <div class="container">
     <h1 class="mb-4">Deteksi Jenis Sampah</h1>
@@ -35,12 +37,11 @@
     </div>
 
     <div id="preview-area" class="mx-auto mb-3"></div>
-
     <div id="hasil" class="alert alert-info w-75 mx-auto">Jenis Sampah: -</div>
   </div>
 
-  <!-- Bootstrap Bundle JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- ✅ Bootstrap Bundle (JS) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-LPYQq5x2S7u8qj4kpp7GSlHTfqEOjW8ly8XzS1D7zXz9UzA/X4mvVClFuLzM2HKM" crossorigin="anonymous"></script>
 
   <script type="text/javascript">
     const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/";
