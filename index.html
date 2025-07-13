@@ -35,12 +35,16 @@
   <div class="container">
     <h1 class="mb-4">Deteksi Jenis Sampah</h1>
 
+    <!-- Tombol Kamera dan Upload -->
     <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
       <button class="btn btn-primary" onclick="initCamera()">📷 Mulai Kamera</button>
       <input class="form-control w-auto" type="file" accept="image/*" onchange="predictUpload(event)" />
     </div>
 
+    <!-- Preview -->
     <div id="preview-area" class="mx-auto mb-3"></div>
+
+    <!-- Hasil Deteksi -->
     <div id="hasil" class="alert alert-info w-75 mx-auto">Jenis Sampah: -</div>
   </div>
 
@@ -52,7 +56,7 @@
 
     let model, webcam, maxPredictions;
 
-    // Load model saat halaman siap
+    // 🔁 Load model saat halaman dibuka
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         const modelURL = MODEL_URL + "model.json";
@@ -66,9 +70,12 @@
       }
     });
 
-    // Kamera
+    // 📷 Inisialisasi Kamera
     async function initCamera() {
       try {
+        if (webcam) {
+          await webcam.stop(); // stop dulu jika kamera sebelumnya masih aktif
+        }
         webcam = new tmImage.Webcam(300, 300, true);
         await webcam.setup({ facingMode: "environment" });
         await webcam.play();
@@ -77,6 +84,8 @@
         const container = document.getElementById("preview-area");
         container.innerHTML = "";
         container.appendChild(webcam.canvas);
+
+        document.getElementById("hasil").innerText = "Jenis Sampah: -";
       } catch (err) {
         alert("Gagal mengakses kamera: " + err.message);
       }
@@ -94,6 +103,7 @@
       showResult(prediction);
     }
 
+    // 📁 Upload gambar, kamera dimatikan jika aktif
     async function predictUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -104,7 +114,7 @@
       }
 
       const img = document.createElement("img");
-      img.src = window.URL.createObjectURL(file); // ✅ ini sekarang aman
+      img.src = window.URL.createObjectURL(file);
       img.classList.add("img-fluid");
 
       img.onload = async () => {
@@ -113,10 +123,20 @@
       };
 
       const container = document.getElementById("preview-area");
+
+      // ✅ Stop kamera jika sedang aktif
+      if (webcam) {
+        await webcam.stop();
+        webcam = null;
+      }
+
       container.innerHTML = "";
       container.appendChild(img);
+
+      document.getElementById("hasil").innerText = "Jenis Sampah: -";
     }
 
+    // 🧠 Tampilkan hasil prediksi
     function showResult(predictions) {
       const sorted = predictions.sort((a, b) => b.probability - a.probability);
       const hasil = sorted[0];
