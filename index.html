@@ -30,8 +30,13 @@
   <h1>Deteksi Jenis Sampah</h1>
   <button onclick="init()">📷 Mulai Kamera</button>
   <input type="file" accept="image/*" onchange="predictUpload(event)">
+  
+  <!-- Tempat kamera atau canvas webcam -->
   <div id="cameraContainer"><video id="webcam" autoplay muted playsinline></video></div>
+  
+  <!-- Preview gambar upload -->
   <div><img id="preview" style="display:none;" /></div>
+  
   <div id="hasil">Jenis Sampah: -</div>
 
   <script type="text/javascript">
@@ -47,9 +52,10 @@
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
-        // Matikan gambar upload kalau sebelumnya ditampilkan
+        // Sembunyikan preview upload
         document.getElementById("preview").style.display = "none";
 
+        // Aktifkan webcam
         webcam = new tmImage.Webcam(300, 300, true);
         await webcam.setup({ facingMode: "environment" });
         await webcam.play();
@@ -83,14 +89,15 @@
       if (webcam) {
         await webcam.stop();
         webcam = null;
+        document.getElementById("cameraContainer").innerHTML =
+          '<video id="webcam" autoplay muted playsinline></video>';
       }
 
-      // Tampilkan gambar preview
+      // Tampilkan preview gambar
       const imgElement = document.getElementById("preview");
       imgElement.src = URL.createObjectURL(file);
       imgElement.style.display = "block";
 
-      // Prediksi setelah gambar dimuat
       imgElement.onload = async () => {
         const prediction = await model.predict(imgElement);
         showResult(prediction);
