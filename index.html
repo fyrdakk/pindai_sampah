@@ -55,8 +55,9 @@
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PwJntFwAY/";
 
     let model, webcam, maxPredictions;
+    let loopId = null; // untuk menyimpan loop kamera
 
-    // 🔁 Load model saat halaman dibuka
+    // Load model saat halaman dibuka
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         const modelURL = MODEL_URL + "model.json";
@@ -70,16 +71,22 @@
       }
     });
 
-    // 📷 Inisialisasi Kamera
+    // Inisialisasi Kamera
     async function initCamera() {
       try {
         if (webcam) {
-          await webcam.stop(); // stop dulu jika kamera sebelumnya masih aktif
+          await webcam.stop();
         }
+
+        if (loopId) {
+          cancelAnimationFrame(loopId); // hentikan loop sebelumnya
+          loopId = null;
+        }
+
         webcam = new tmImage.Webcam(300, 300, true);
         await webcam.setup({ facingMode: "environment" });
         await webcam.play();
-        window.requestAnimationFrame(loop);
+        loopId = window.requestAnimationFrame(loop);
 
         const container = document.getElementById("preview-area");
         container.innerHTML = "";
@@ -94,7 +101,7 @@
     async function loop() {
       webcam.update();
       await predictCamera();
-      window.requestAnimationFrame(loop);
+      loopId = window.requestAnimationFrame(loop);
     }
 
     async function predictCamera() {
@@ -103,7 +110,7 @@
       showResult(prediction);
     }
 
-    // 📁 Upload gambar, kamera dimatikan jika aktif
+    // Upload gambar, kamera dimatikan jika aktif
     async function predictUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -124,10 +131,15 @@
 
       const container = document.getElementById("preview-area");
 
-      // ✅ Stop kamera jika sedang aktif
+      // Stop kamera dan animasi loop jika aktif
       if (webcam) {
         await webcam.stop();
         webcam = null;
+      }
+
+      if (loopId) {
+        cancelAnimationFrame(loopId);
+        loopId = null;
       }
 
       container.innerHTML = "";
@@ -136,7 +148,6 @@
       document.getElementById("hasil").innerText = "Jenis Sampah: -";
     }
 
-    // 🧠 Tampilkan hasil prediksi
     function showResult(predictions) {
       const sorted = predictions.sort((a, b) => b.probability - a.probability);
       const hasil = sorted[0];
