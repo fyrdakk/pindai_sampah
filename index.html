@@ -18,6 +18,26 @@
   <div><video id="webcam" autoplay muted playsinline width="300"></video></div>
   <div id="hasil">Jenis Sampah: -</div>
 
+  <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Deteksi Sampah</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 30px; }
+    video, canvas, img { width: 300px; margin: 10px; border-radius: 10px; }
+    #hasil { font-size: 20px; font-weight: bold; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Deteksi Jenis Sampah</h1>
+  <button onclick="init()">📷 Mulai Kamera</button>
+  <input type="file" accept="image/*" onchange="predictUpload(event)">
+  <div><video id="webcam" autoplay muted playsinline width="300"></video></div>
+  <div id="hasil">Jenis Sampah: -</div>
+
   <script type="text/javascript">
     const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/"; // MODEL SIAP PAKAI
 
@@ -72,5 +92,8 @@
         "Jenis Sampah: " + hasil.className + " (" + (hasil.probability * 100).toFixed(2) + "%)";
     }
   </script>
+</body>
+</html>
+
 </body>
 </html>
