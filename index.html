@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Deteksi Jenis Sampah</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MQFJ4hUjwrMoZzJ5LmVv5ZV8rPl3nRzpe9V78/5Uhw9K/qMJjTk/s1bQ4dMJqBkI" crossorigin="anonymous">
 
-  <!-- TensorFlow dan Teachable Machine -->
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- TensorFlow & Teachable Machine -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; padding-top: 30px; }
-    #preview-area video,
-    #preview-area canvas,
-    #preview-area img {
+    body { padding-top: 30px; background-color: #f8f9fa; }
+    #preview-area video, #preview-area canvas, #preview-area img {
       width: 100%;
       max-width: 300px;
       border-radius: 10px;
@@ -26,37 +26,50 @@
     }
   </style>
 </head>
-<body class="bg-light text-center">
+<body class="text-center">
 
   <div class="container">
     <h1 class="mb-4">Deteksi Jenis Sampah</h1>
 
-    <div class="d-flex justify-content-center mb-3 flex-wrap gap-2">
-      <button class="btn btn-primary" onclick="init()">📷 Mulai Kamera</button>
+    <!-- Tombol Aksi -->
+    <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+      <button class="btn btn-primary" onclick="initCamera()">📷 Mulai Kamera</button>
       <input class="form-control w-auto" type="file" accept="image/*" onchange="predictUpload(event)">
     </div>
 
+    <!-- Preview kamera atau gambar -->
     <div id="preview-area" class="mx-auto mb-3"></div>
+
+    <!-- Hasil Deteksi -->
     <div id="hasil" class="alert alert-info w-75 mx-auto">Jenis Sampah: -</div>
   </div>
 
-  <!-- ✅ Bootstrap Bundle (JS) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-LPYQq5x2S7u8qj4kpp7GSlHTfqEOjW8ly8XzS1D7zXz9UzA/X4mvVClFuLzM2HKM" crossorigin="anonymous"></script>
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script type="text/javascript">
+  <script>
     const URL = "https://teachablemachine.withgoogle.com/models/QkCmwS15M/";
 
     let model, webcam, maxPredictions;
 
-    async function init() {
-      const modelURL = URL + "model.json";
-      const metadataURL = URL + "metadata.json";
-
+    // ✅ Auto load model saat halaman dibuka
+    window.addEventListener("DOMContentLoaded", async () => {
       try {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
+        console.log("✅ Model berhasil dimuat.");
+      } catch (err) {
+        console.error("❌ Gagal memuat model:", err);
+        alert("Gagal memuat model. Silakan cek koneksi atau URL model.");
+      }
+    });
 
-        webcam = new tmImage.Webcam(300, 300, true);
+    // 📷 Inisialisasi Kamera
+    async function initCamera() {
+      try {
+        webcam = new tmImage.Webcam(300, 300, true); // true: kamera belakang
         await webcam.setup({ facingMode: "environment" });
         await webcam.play();
         window.requestAnimationFrame(loop);
@@ -66,24 +79,30 @@
         container.appendChild(webcam.canvas);
       } catch (err) {
         alert("Gagal mengakses kamera: " + err.message);
-        console.error("Error kamera atau model:", err);
       }
     }
 
     async function loop() {
       webcam.update();
-      await predict();
+      await predictCamera();
       window.requestAnimationFrame(loop);
     }
 
-    async function predict() {
+    async function predictCamera() {
+      if (!model) return;
       const prediction = await model.predict(webcam.canvas);
       showResult(prediction);
     }
 
+    // 📤 Prediksi dari gambar upload
     async function predictUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
+
+      if (!model) {
+        alert("Model belum siap. Tunggu sebentar lalu coba lagi.");
+        return;
+      }
 
       const img = document.createElement("img");
       img.src = URL.createObjectURL(file);
@@ -99,6 +118,7 @@
       container.appendChild(img);
     }
 
+    // 🔎 Tampilkan hasil prediksi
     function showResult(predictions) {
       const sorted = predictions.sort((a, b) => b.probability - a.probability);
       const hasil = sorted[0];
