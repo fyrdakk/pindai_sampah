@@ -190,13 +190,12 @@
       document.getElementById("hasil").innerText =
         "Jenis Sampah: " + hasil.className + " (" + (hasil.probability * 100).toFixed(2) + "%)";
 
-      // Tampilkan info penjelasan
       const klasifikasi = hasil.className.toLowerCase();
-      if (klasifikasi.includes("organik")) {
+      if (klasifikasi === "organik") {
         tampilkanInfo("Organik");
-      } else if (klasifikasi.includes("anorganik")) {
+      } else if (klasifikasi === "anorganik") {
         tampilkanInfo("Anorganik");
-      } else if (klasifikasi.includes("b3")) {
+      } else if (klasifikasi === "b3") {
         tampilkanInfo("B3");
       } else {
         infoBox.classList.remove("active");
