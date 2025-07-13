@@ -189,13 +189,13 @@
       const hasil = sorted[0];
       document.getElementById("hasil").innerText =
         "Jenis Sampah: " + hasil.className + " (" + (hasil.probability * 100).toFixed(2) + "%)";
-
+    
       const klasifikasi = hasil.className.toLowerCase();
-      if (klasifikasi === "organik") {
+      if (klasifikasi.includes("organik")) {
         tampilkanInfo("Organik");
-      } else if (klasifikasi === "anorganik") {
+      } else if (klasifikasi.includes("anorganik")) {
         tampilkanInfo("Anorganik");
-      } else if (klasifikasi === "bahan beracun dan berbahaya (b3)") {
+      } else if (klasifikasi.includes("b3")) {
         tampilkanInfo("Bahan Beracun dan Berbahaya (B3)");
       } else {
         infoBox.classList.remove("active");
